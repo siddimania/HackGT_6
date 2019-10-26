@@ -89,7 +89,7 @@ public class MainActivity extends AppCompatActivity {
 
     inputMessage = findViewById(R.id.message);
     btnSend = findViewById(R.id.btn_send);
-    btnRecord = findViewById(R.id.btn_record);
+//    btnRecord = findViewById(R.id.btn_record);
     String customFont = "Montserrat-Regular.ttf";
     Typeface typeface = Typeface.createFromAsset(getAssets(), customFont);
     inputMessage.setTypeface(typeface);
@@ -119,21 +119,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    recyclerView.addOnItemTouchListener(new RecyclerTouchListener(getApplicationContext(), recyclerView, new ClickListener() {
-      @Override
-      public void onClick(View view, final int position) {
-        Message audioMessage = (Message) messageArrayList.get(position);
-        if (audioMessage != null && !audioMessage.getMessage().isEmpty()) {
-          new SayTask().execute(audioMessage.getMessage());
-        }
-      }
-
-      @Override
-      public void onLongClick(View view, int position) {
-        recordMessage();
-
-      }
-    }));
 
     btnSend.setOnClickListener(new View.OnClickListener() {
       @Override
@@ -144,49 +129,10 @@ public class MainActivity extends AppCompatActivity {
       }
     });
 
-    btnRecord.setOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View v) {
-        recordMessage();
-      }
-    });
-
     createServices();
     sendMessage();
   }
 
-  ;
-
-  // Speech-to-Text Record Audio permission
-  @Override
-  public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-    super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-    switch (requestCode) {
-      case REQUEST_RECORD_AUDIO_PERMISSION:
-        permissionToRecordAccepted = grantResults[0] == PackageManager.PERMISSION_GRANTED;
-        break;
-      case RECORD_REQUEST_CODE: {
-
-        if (grantResults.length == 0
-          || grantResults[0] !=
-          PackageManager.PERMISSION_GRANTED) {
-
-          Log.i(TAG, "Permission has been denied by user");
-        } else {
-          Log.i(TAG, "Permission has been granted by user");
-        }
-        return;
-      }
-
-      case MicrophoneHelper.REQUEST_PERMISSION: {
-        if (grantResults.length > 0 && grantResults[0] != PackageManager.PERMISSION_GRANTED) {
-          Toast.makeText(this, "Permission to record audio denied", Toast.LENGTH_SHORT).show();
-        }
-      }
-    }
-    // if (!permissionToRecordAccepted ) finish();
-
-  }
 
   protected void makeRequest() {
     ActivityCompat.requestPermissions(this,
@@ -208,8 +154,7 @@ public class MainActivity extends AppCompatActivity {
       inputMessage.setMessage(inputmessage);
       inputMessage.setId("100");
       this.initialRequest = false;
-      Toast.makeText(getApplicationContext(), "Tap on the message for Voice", Toast.LENGTH_LONG).show();
-
+//      Toast.makeText(getApplicationContext(), "Tap on the message for Voice", Toast.LENGTH_LONG).show();
     }
 
     this.inputMessage.setText("");
@@ -244,7 +189,7 @@ public class MainActivity extends AppCompatActivity {
             messageArrayList.add(outMessage);
 
             // speak the message
-            new SayTask().execute(outMessage.getMessage());
+//            new SayTask().execute(outMessage.getMessage());
 
             runOnUiThread(new Runnable() {
               public void run() {
@@ -276,35 +221,6 @@ public class MainActivity extends AppCompatActivity {
         .accept(HttpMediaType.AUDIO_WAV)
         .build()).execute().getResult());
       return "Did synthesize";
-    }
-  }
-
-  //Record a message via Watson Speech to Text
-  private void recordMessage() {
-    if (listening != true) {
-      capture = microphoneHelper.getInputStream(true);
-      new Thread(new Runnable() {
-        @Override
-        public void run() {
-          try {
-            speechService.recognizeUsingWebSocket(getRecognizeOptions(capture), new MicrophoneRecognizeDelegate());
-          } catch (Exception e) {
-            showError(e);
-          }
-        }
-      }).start();
-      listening = true;
-      Toast.makeText(MainActivity.this, "Listening....Click to Stop", Toast.LENGTH_LONG).show();
-
-    } else {
-      try {
-        microphoneHelper.closeInputStream();
-        listening = false;
-        Toast.makeText(MainActivity.this, "Stopped Listening....Click to Start", Toast.LENGTH_LONG).show();
-      } catch (Exception e) {
-        e.printStackTrace();
-      }
-
     }
   }
 
