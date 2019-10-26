@@ -72,18 +72,16 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         ((ViewHolder) holder).message.setText(formattedMessage);
 
         if (message.id.equals("2")) {
-            if (formattedMessage.contains("done with") && (formattedMessage.contains("Saving") || formattedMessage.contains("Searching"))) {
-                if (formattedMessage.contains("Saving")) {
-                    String activityPerformed = formattedMessage.replace("Saving that you're done with ", "");
+            if (formattedMessage.contains("done with") && (formattedMessage.contains("saved") || formattedMessage.contains("searching"))) {
+                if (formattedMessage.contains("saved")) {
+                    String activityPerformed = formattedMessage.replace("saved, that you're done with ", "");
                     List<ActivitySave> performedActivityFound = ActivitySave.find(ActivitySave.class, "activity_performed = ? and today_date = ?", activityPerformed, getTodayDate());
                     if (performedActivityFound.size() == 0) {
                         ActivitySave saveActivity = new ActivitySave(activityPerformed);
                         saveActivity.save();
                     }
-                    message.setMessage("Done");
-                    ((ViewHolder) holder).message.setText(message.getMessage());
-                } else if (formattedMessage.contains("Searching")) {
-                    String activityPerformed = formattedMessage.replace("Searching if you're done with ", "");
+                } else if (formattedMessage.contains("searching")) {
+                    String activityPerformed = formattedMessage.replace("searching if you're done with ", "");
                     List<ActivitySave> performedActivityFound = ActivitySave.find(ActivitySave.class, "activity_performed = ? and today_date = ?", activityPerformed, getTodayDate());
 
                     if (performedActivityFound.size() > 0) {
@@ -99,16 +97,16 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                         pastActi.delete();
                     }
                 }
-            } else if (formattedMessage.contains("paid") && (formattedMessage.contains("Saving") || formattedMessage.contains("searching"))) {
-                if (formattedMessage.contains("Saving")) {
-                    String billPaidStr = formattedMessage.replace("Saving that you already paid ", "");
+            } else if (formattedMessage.contains("paid") && (formattedMessage.contains("saved") || formattedMessage.contains("searching"))) {
+                if (formattedMessage.contains("saved")) {
+                    String billPaidStr = formattedMessage.replace("saved, that you already paid ", "");
                     List<BillPaid> billPaid = BillPaid.find(BillPaid.class, "paid_bill = ? and current_month = ?", billPaidStr, getCurrentMonth());
                     if (billPaid.size() == 0) {
                         BillPaid saveBillPaid = new BillPaid(billPaidStr);
                         saveBillPaid.save();
+                        message.setMessage("Done");
+                        ((ViewHolder) holder).message.setText(message.getMessage());
                     }
-                    message.setMessage("Done");
-                    ((ViewHolder) holder).message.setText(message.getMessage());
                 } else if (formattedMessage.contains("searching")) {
                     String billPaidStr = formattedMessage.replace("searching if you already paid ", "");
                     List<BillPaid> billPaid = BillPaid.find(BillPaid.class, "paid_bill = ? and current_month = ?", billPaidStr, getCurrentMonth());
