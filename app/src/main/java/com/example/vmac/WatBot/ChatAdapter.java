@@ -104,8 +104,6 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                     if (billPaid.size() == 0) {
                         BillPaid saveBillPaid = new BillPaid(billPaidStr);
                         saveBillPaid.save();
-                        message.setMessage("Done");
-                        ((ViewHolder) holder).message.setText(message.getMessage());
                     }
                 } else if (formattedMessage.contains("searching")) {
                     String billPaidStr = formattedMessage.replace("searching if you already paid ", "");
