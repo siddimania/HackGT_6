@@ -16,6 +16,7 @@ import android.widget.Toast;
 
 import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -72,11 +73,11 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
         if (message.id.equals("2")) {
             if(formattedMessage.contains("done with")) {
-                if(formattedMessage.contains("Saving that you're done with")) {
+                if(formattedMessage.contains("Saving")) {
                     String activityPerformed = formattedMessage.replace("saving that you're done with ", "");
                     ActivitySave saveActivity = new ActivitySave(activityPerformed);
                     saveActivity.save();
-                } else if(formattedMessage.contains("Searching if you're done with")) {
+                } else if(formattedMessage.contains("Searching")) {
                     String activityPerformed = formattedMessage.replace("Searching if you're done with ", "");
                     List<ActivitySave> performedActivityFound = ActivitySave.find(ActivitySave.class, "activity_performed = ? and today_date = ?", activityPerformed, getTodayDate()) ;
 
@@ -94,12 +95,50 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                     }
                 }
             } else if(formattedMessage.contains("paid")) {
-                if(formattedMessage.contains("")) {
+                if(formattedMessage.contains("Saving")) {
+                    String billPaid = formattedMessage.replace("Saving that you already paid ", "");
+                    BillPaid saveBillPaid = new BillPaid(billPaid);
+                    saveBillPaid.save();
+                } else if (formattedMessage.contains("Searching")) {
+                    String billPaidStr = formattedMessage.replace("searching if you already paid ", "");
+                    List<BillPaid> billPaid = BillPaid.find(BillPaid.class, "paid_bill = ? and current_month = ?", billPaidStr, getCurrentMonth()) ;
 
+                    if(billPaid.size() > 0) {
+                        message.setMessage("You already Performed this activity");
+                        ((ViewHolder) holder).message.setText(message.getMessage());
+                    } else {
+                        message.setMessage("You did not perform this activity today");
+                        ((ViewHolder) holder).message.setText(message.getMessage());
+                    }
+
+                    List<BillPaid> pastBills = BillPaid.find(BillPaid.class, "current_month != ?", getCurrentMonth()) ;
+                    for (BillPaid pastBill: pastBills) {
+                        pastBill.delete();
+                    }
                 }
+            } else if(formattedMessage.contains("Retrieving")) {
+                List<ActivitySave> pastActivities = ActivitySave.find(ActivitySave.class, "today_date = ?", getTodayDate()) ;
+                String messagePrint = "";
+                for (ActivitySave pastActi: pastActivities) {
+                    messagePrint = messagePrint.concat("You already done with " + pastActi + System.getProperty("line.separator"));
+                }
+                List<BillPaid> pastBills = BillPaid.find(BillPaid.class, "current_month = ?", getCurrentMonth());
+                for (BillPaid pastBill: pastBills) {
+                    messagePrint = messagePrint.concat("You already paid " + pastBill + System.getProperty("line.separator"));
+                }
+                message.setMessage(messagePrint);
+                ((ViewHolder) holder).message.setText(message.getMessage());
             }
-
         }
+    }
+
+    private String getCurrentMonth() {
+        String[] monthName = {"January", "February",
+                "March", "April", "May", "June", "July",
+                "August", "September", "October", "November",
+                "December"};
+        Calendar cal = Calendar.getInstance();
+        return monthName[cal.get(Calendar.MONTH)];
     }
 
     private String getTodayDate() {
