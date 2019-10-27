@@ -110,16 +110,41 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                     List<BillPaid> billPaid = BillPaid.find(BillPaid.class, "paid_bill = ? and current_month = ?", billPaidStr, getCurrentMonth());
 
                     if (billPaid.size() > 0) {
-                        message.setMessage("You already Performed this activity");
+                        message.setMessage("You already Paid the Bill");
                         ((ViewHolder) holder).message.setText(message.getMessage());
                     } else {
-                        message.setMessage("You did not perform this activity today");
+                        message.setMessage("You did not Pay the Bill");
                         ((ViewHolder) holder).message.setText(message.getMessage());
                     }
 
                     List<BillPaid> pastBills = BillPaid.find(BillPaid.class, "current_month != ?", getCurrentMonth());
                     for (BillPaid pastBill : pastBills) {
                         pastBill.delete();
+                    }
+                }
+            } else if (formattedMessage.contains("pill") && (formattedMessage.contains("saved") || formattedMessage.contains("searching"))) {
+                if (formattedMessage.contains("saved")) {
+                    String pillTakenStr = formattedMessage.replace("saved, taken ", "");
+                    List<PillTaken> billPaid = PillTaken.find(PillTaken.class, "pill_taken = ? and today_date = ?", pillTakenStr, getTodayDate());
+                    if (billPaid.size() == 0) {
+                        PillTaken saveBillPaid = new PillTaken(pillTakenStr);
+                        saveBillPaid.save();
+                    }
+                } else if (formattedMessage.contains("searching")) {
+                    String pillTook = formattedMessage.replace("searching if you took ", "");
+                    List<PillTaken> pillTookFound = PillTaken.find(PillTaken.class, "pill_taken = ? and today_date = ?", pillTook, getTodayDate());
+
+                    if (pillTookFound.size() > 0) {
+                        message.setMessage("You already took the pill");
+                        ((ViewHolder) holder).message.setText(message.getMessage());
+                    } else {
+                        message.setMessage("You did not take the pill");
+                        ((ViewHolder) holder).message.setText(message.getMessage());
+                    }
+
+                    List<PillTaken> pastTakenBills = PillTaken.find(PillTaken.class, "today_date != ?", getTodayDate());
+                    for (PillTaken pastPill : pastTakenBills) {
+                        pastPill.delete();
                     }
                 }
             } else if (formattedMessage.contains("Retrieving")) {
