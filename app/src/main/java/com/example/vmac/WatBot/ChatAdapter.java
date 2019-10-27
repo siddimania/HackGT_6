@@ -160,6 +160,16 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                     messagePrint = messagePrint.concat(i + ". You already paid " + pastBill.getPaidBill() + System.getProperty("line.separator"));
                     i++;
                 }
+                List<PillTaken> pillsTaken = PillTaken.find(PillTaken.class, "today_date = ?", getTodayDate());
+                for (PillTaken pillTaken : pillsTaken) {
+                    messagePrint = messagePrint.concat(i + ". You already took " + pillTaken.getPillTaken() + System.getProperty("line.separator"));
+                    i++;
+                }
+
+                if(messagePrint.isEmpty()) {
+                    messagePrint = "There is not activity to show";
+                }
+                
                 message.setMessage(messagePrint);
                 ((ViewHolder) holder).message.setText(message.getMessage());
             }
